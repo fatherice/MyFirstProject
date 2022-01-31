@@ -15,32 +15,24 @@ public class Cipher {
 
     private static String encrypt(String string, int key) {
         string = string.toLowerCase();
-        String cipherText = "";
+        StringBuilder cipherText = new StringBuilder();
         for (int i = 0; i < string.length(); i++) {
             int charPosition = RUS_SYMBOLS.indexOf(string.charAt(i));
             if (charPosition != -1) {
                 int keyVal = (charPosition + key) % alphaLength;
                 char replaceVal = RUS_SYMBOLS.charAt(keyVal);
-                cipherText += replaceVal;
+                cipherText.append(replaceVal);
             } else {
-                cipherText+= string.charAt(i);
+                cipherText.append(string.charAt(i));
             }
         }
-        return cipherText;
+        return cipherText.toString();
     }
 
     public static void getEncFile() throws IOException {
         List<String> list = Files.readAllLines(Menu.getInputPath());
         int key = getKey();
-        try (BufferedWriter writer = Files.newBufferedWriter(Menu.getOutputPath())) {
-            for (String s: list) {
-                writer.write(encrypt(s, key) + "\n");
-            }
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        } finally {
-            System.out.println("Файл зашифрован!");
-        }
+        writeResultFile(list, key);
     }
 
     public static void getDecFile() throws IOException {
@@ -49,27 +41,19 @@ public class Cipher {
             if (key < 0) {
                 key = (alphaLength + key) % alphaLength;
             }
-        try (BufferedWriter writer = Files.newBufferedWriter(Menu.getOutputPath())) {
-            for (String s: list) {
-                writer.write(encrypt(s, key) + "\n");
-            }
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        } finally {
-            System.out.println("Файл расшифрован!");
-        }
+        writeResultFile(list, key);
     }
 
     public static void bruteForce() throws IOException {
         boolean isRead = false;
         List<String> list = Files.readAllLines(Menu.getInputPath());
-        for (int key = 1; key < alphaLength; key++) {
+        int key;
+        for (key = 1; key < alphaLength; key++) {
             for (String s: list) {
                 if (s.length() > 40) {
                     String temp = encrypt(s, key);
                     if (isReadable(temp)) {
                         isRead = true;
-                        System.out.println("Ключ: " + (alphaLength - key));
                         break;
                     }
                 }
@@ -78,6 +62,8 @@ public class Cipher {
                 break;
             }
         }
+        System.out.println("Ключ: " + (alphaLength - key));
+        writeResultFile(list, key);
     }
 
     private static boolean isReadable(String text) {
@@ -94,6 +80,18 @@ public class Cipher {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите ключ шифрования:");
         return scanner.nextInt();
+    }
+
+    private static void writeResultFile(List<String> list, int key) {
+        try (BufferedWriter writer = Files.newBufferedWriter(Menu.getOutputPath())) {
+            for (String s : list) {
+                writer.write(encrypt(s, key) + "\n");
+            }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        } finally {
+            System.out.println("Файл готов!");
+        }
     }
 
     private static HashMap<Character, Integer> getStat(String s) {
