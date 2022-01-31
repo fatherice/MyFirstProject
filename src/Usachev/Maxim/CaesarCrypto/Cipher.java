@@ -29,24 +29,22 @@ public class Cipher {
         return cipherText.toString();
     }
 
-    public static void getEncFile() throws IOException {
-        List<String> list = Files.readAllLines(Menu.getInputPath());
+    public static void getEncFile() {
         int key = getKey();
-        writeResultFile(list, key);
+        writeResultFile(Menu.getInputFile(), key);
     }
 
-    public static void getDecFile() throws IOException {
-        List<String> list = Files.readAllLines(Menu.getInputPath());
+    public static void getDecFile() {
             int key = (alphaLength - getKey()) % alphaLength;
             if (key < 0) {
                 key = (alphaLength + key) % alphaLength;
             }
-        writeResultFile(list, key);
+        writeResultFile(Menu.getInputFile(), key);
     }
 
-    public static void bruteForce() throws IOException {
+    public static void bruteForce() {
         boolean isRead = false;
-        List<String> list = Files.readAllLines(Menu.getInputPath());
+        List<String> list = Menu.getInputFile();
         int key;
         for (key = 1; key < alphaLength; key++) {
             for (String s: list) {
@@ -93,6 +91,7 @@ public class Cipher {
             System.out.println("Файл готов!");
         }
     }
+
 
     private static HashMap<Character, Integer> getStat(String s) {
         HashMap<Character, Integer> hashMap = new HashMap<>();

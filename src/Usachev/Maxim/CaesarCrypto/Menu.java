@@ -5,6 +5,7 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
@@ -12,10 +13,10 @@ public class Menu {
     private static final String CIPHER = "1. Зашифровать файл.";
     private static final String DECIPHER = "2. Расшифровать файл.";
     private static final String BRUTEFORCE = "3. Подобрать шифр (brute force).";
-    private static final String STATIC_ANALYSIS = "4. Подобрать шифр методом статистического анализа.";
+    private static final String STATIC_ANALYSIS = "4. Подобрать шифр методом статистического анализа. (В разработке)";
     private static final String EXIT = "0. Выход.";
 
-    public static void run() throws IOException {
+    public static void run() {
         int i = getMenuChoice();
         if (i == 1) {
             Cipher.getEncFile();
@@ -36,11 +37,14 @@ public class Menu {
         showMenu();
         while (true) {
             String choice = scanner.nextLine();
-            i = Integer.parseInt(choice);
-            if (i >= 0 && i < 5) {
-                return i;
-            } else {
-                System.out.println("Введите номер существующего раздела или нажмите 0 для выхода!");
+            try {
+                i = Integer.parseInt(choice);
+                if (i >= 0 && i < 5) {
+                    return i;
+                }
+            } catch (NumberFormatException n) {
+                System.out.println("Введите номер существующего раздела или нажмите 0 для выхода!" + "\n");
+                showMenu();
             }
         }
     }
@@ -67,18 +71,21 @@ public class Menu {
         }
     }
 
-    public static Path getInputPath() {
-        String chooseInputFile = "Укажите путь к исходному файлу:";
-        System.out.println(chooseInputFile);
+    public static List<String> getInputFile() {
+        System.out.println("Укажите путь к исходному файлу:");
         Scanner scanner = new Scanner(System.in);
-        while (true) {
-            Path path = Paths.get(scanner.nextLine());
-            if (!Files.isRegularFile(path)) {
-                System.out.println("Файл не существует. Введите корректный путь.");
-            } else {
-                return path;
-            }
+        Path path = Paths.get(scanner.nextLine());
+        while (!Files.isRegularFile(path)) {
+            System.out.println("Файл не существует. Введите корректный путь.");
+            path = Paths.get(scanner.nextLine());
         }
+        List<String> list = null;
+        try {
+            list = Files.readAllLines(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     private static void showMenu() {
